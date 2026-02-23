@@ -4,7 +4,7 @@ import SwiftData
 @main
 struct HealingTodoAppApp: App {
     private var sharedModelContainer: ModelContainer = {
-        let schema = Schema([Task.self, Category.self, UserSettings.self])
+        let schema = Schema([Task.self, Category.self, UserSettings.self, DailyStreak.self, ReminderConfig.self])
         do {
             return try ModelContainer(for: schema)
         } catch {

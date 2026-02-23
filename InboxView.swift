@@ -9,6 +9,9 @@ struct InboxView: View {
     @Query(sort: [SortDescriptor(\Category.sortOrder)]) private var categories: [Category]
     @State private var isAddPresented = false
     @State private var isAddCategoryPresented = false
+    @State private var isReminderSettingsPresented = false
+    @State private var isWeeklyReflectionPresented = false
+    @Query private var streakEntries: [DailyStreak]
     @State private var pendingCategoryID: UUID?
     @State private var activePushPopTaskID: UUID?
     @State private var pickerAnchor: CGRect?
@@ -23,6 +26,13 @@ struct InboxView: View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
                 List {
+                    if !streakEntries.isEmpty {
+                        Section {
+                            GardenGrowthView(streakInfo: computeStreak(entries: streakEntries))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                        }
+                    }
                     if tasks.isEmpty {
                         emptyState
                     } else {
@@ -62,11 +72,29 @@ struct InboxView: View {
                 .navigationTitle("Inbox")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: showAdd) {
-                            Image(systemName: "plus")
-                                .font(.title3.weight(.semibold))
+                        HStack(spacing: 12) {
+                            Button {
+                                isWeeklyReflectionPresented = true
+                            } label: {
+                                Image(systemName: "chart.bar.fill")
+                                    .font(.body.weight(.semibold))
+                            }
+                            .accessibilityLabel("Weekly reflection")
+
+                            Button {
+                                isReminderSettingsPresented = true
+                            } label: {
+                                Image(systemName: "bell.fill")
+                                    .font(.body.weight(.semibold))
+                            }
+                            .accessibilityLabel("Reminder settings")
+
+                            Button(action: showAdd) {
+                                Image(systemName: "plus")
+                                    .font(.title3.weight(.semibold))
+                            }
+                            .accessibilityLabel("Add task")
                         }
-                        .accessibilityLabel("Add task")
                     }
                 }
 
@@ -86,6 +114,14 @@ struct InboxView: View {
                 pendingCategoryID = category.id
             })
             .presentationBackground(.thinMaterial)
+        }
+        .sheet(isPresented: $isReminderSettingsPresented) {
+            ReminderSettingsView()
+                .presentationBackground(.thinMaterial)
+        }
+        .sheet(isPresented: $isWeeklyReflectionPresented) {
+            WeeklyReflectionView()
+                .presentationBackground(.thinMaterial)
         }
         .onAppear(perform: ensureDefaultCategories)
         .overlay(alignment: .topLeading) {
@@ -443,10 +479,40 @@ struct InboxView: View {
             task.completedAt = task.isDone ? .now : nil
         }
         Haptic.play(.completeSuccess)
+
+        // Record streak entry when completing a task
+        if task.isDone {
+            recordStreakCompletion()
+        }
+
         do {
             try context.save()
         } catch {
             assertionFailure("Failed to save task toggle: \(error.localizedDescription)")
+        }
+    }
+
+    private func recordStreakCompletion() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let todayEnd = cal.date(byAdding: .day, value: 1, to: today)!
+
+        let predicate = #Predicate<DailyStreak> { entry in
+            entry.date >= today && entry.date < todayEnd
+        }
+        let descriptor = FetchDescriptor<DailyStreak>(predicate: predicate)
+
+        if let existing = try? context.fetch(descriptor), let entry = existing.first {
+            entry.tasksCompleted += 1
+        } else {
+            let entry = DailyStreak(date: .now, tasksCompleted: 1)
+            context.insert(entry)
+        }
+
+        do {
+            try context.save()
+        } catch {
+            assertionFailure("Failed to save streak entry: \(error.localizedDescription)")
         }
     }
 
