@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import TipKit
 
 struct InboxView: View {
     @Environment(\.modelContext) private var context
@@ -421,11 +422,17 @@ struct InboxView: View {
             .padding(.bottom, 4)
     }
 
+    private let welcomeTip = InboxWelcomeTip()
+
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: DS.Spacing.lg) {
+            TipView(welcomeTip)
+                .padding(.horizontal, DS.Spacing.lg)
+
             Image(systemName: "sparkles")
                 .font(.system(size: 42))
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
             Text("Inbox is clear")
                 .font(.headline)
             Text("Pull down or tap the plus to add a gentle reminder.")
@@ -435,18 +442,26 @@ struct InboxView: View {
         }
         .padding(.vertical, 80)
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Inbox is empty. Pull down or tap plus to add a task.")
     }
 
+    @State private var saveError: String?
+
     private func toggle(_ task: Task) {
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+        withAnimation(DS.Animation.standard) {
             task.isDone.toggle()
             task.completedAt = task.isDone ? .now : nil
         }
         Haptic.play(.completeSuccess)
+        FirstCompletionTip.hasCompletedTask = true
         do {
             try context.save()
         } catch {
-            assertionFailure("Failed to save task toggle: \(error.localizedDescription)")
+            // Revert on failure — never leave UI/data out of sync
+            task.isDone.toggle()
+            task.completedAt = task.isDone ? .now : nil
+            saveError = "Couldn't update task. Please try again."
         }
     }
 
