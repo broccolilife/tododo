@@ -12,9 +12,15 @@ struct HealingTodoAppApp: App {
         }
     }()
 
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+
     var body: some Scene {
         WindowGroup {
-            InboxView()
+            if !hasSeenOnboarding {
+                OnboardingView()
+            } else {
+                InboxView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }
