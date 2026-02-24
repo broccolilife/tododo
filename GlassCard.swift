@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Reusable glassmorphic card container using Apple's Liquid Glass API (`.glassEffect`).
+/// Wraps arbitrary content with rounded corners, a subtle gradient border, and drop shadow.
 struct GlassCard<Content: View>: View {
     var tint: Color
     @ViewBuilder var content: Content

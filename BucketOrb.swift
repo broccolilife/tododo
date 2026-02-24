@@ -8,6 +8,8 @@ import UIKit
 import AppKit
 #endif
 
+/// Circular glass orb representing a category — serves as a drag-and-drop target.
+/// Glows briefly on successful drop and uses haptic feedback for tactile confirmation.
 struct BucketOrb: View {
     let category: Category
     let onDropIDs: ([UUID]) -> Void

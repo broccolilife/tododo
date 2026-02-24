@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Central color system for categories. Maps named presets (e.g. "Work", "Health") to
+/// curated SwiftUI colors. Falls back to hex parsing for custom user-defined colors.
 enum Palette {
     private static let colors: [String: Color] = [
         "Inbox": Color(red: 0.85, green: 0.9, blue: 0.95),

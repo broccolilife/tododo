@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Full-screen ambient background with layered gradients and soft blurred shapes.
+/// Uses `.drawingGroup()` to rasterize all layers into a single GPU texture for performance.
 struct AuroraBackground: View {
     var body: some View {
         GeometryReader { proxy in

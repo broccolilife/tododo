@@ -1,6 +1,9 @@
 import Foundation
 import SwiftData
 
+// MARK: - Task
+/// Core todo item persisted via SwiftData. Each task optionally belongs to a Category
+/// and tracks completion state, priority, due date, and freeform tags.
 @Model
 final class Task: Identifiable {
     @Attribute(.unique) var id: UUID
@@ -39,6 +42,9 @@ final class Task: Identifiable {
     }
 }
 
+// MARK: - Category
+/// Organizational bucket for tasks. Owns its tasks via a cascade-delete relationship.
+/// `colorID` maps to a named Palette color or a hex string fallback.
 @Model
 final class Category: Identifiable {
     @Attribute(.unique) var id: UUID
@@ -66,6 +72,9 @@ final class Category: Identifiable {
     }
 }
 
+// MARK: - UserSettings
+/// Singleton-ish user preferences. Stores haptic/sound toggles, companion character name,
+/// and iCloud sync preference.
 @Model
 final class UserSettings {
     var hapticsOn: Bool
