@@ -15,38 +15,38 @@ struct GlassCard<Content: View>: View {
 
     var body: some View {
         content
-            .padding(20)
+            .padding(Tokens.Spacing.xl)
             .frame(maxWidth: .infinity, alignment: .leading)
             .tint(tint)
             .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg, style: .continuous)
                     .fill(.clear)
                     // Crystal clear Apple Liquid Glass card surface
                     .glassEffect(
                         .clear
                             .interactive(),
-                        in: .rect(cornerRadius: 24)
+                        in: .rect(cornerRadius: Tokens.Radius.lg)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        RoundedRectangle(cornerRadius: Tokens.Radius.lg, style: .continuous)
                             .strokeBorder(
                                 .linearGradient(
                                     colors: [
-                                        Color.white.opacity(0.55),
-                                        Color.white.opacity(0.15),
-                                        Color.white.opacity(0.05)
+                                        Color.white.opacity(Tokens.Border.glassHighOpacity),
+                                        Color.white.opacity(Tokens.Border.glassMidOpacity),
+                                        Color.white.opacity(Tokens.Border.glassLowOpacity)
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                lineWidth: 0.75
+                                lineWidth: Tokens.Border.glassWidth
                             )
                             .blendMode(.plusLighter)
                     )
             )
-            .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+            .shadow(color: .black.opacity(Tokens.Shadow.cardOpacity), radius: Tokens.Shadow.cardRadius, x: 0, y: Tokens.Shadow.cardY)
             // Smooth liquid-like animations for state changes
-            .animation(.spring(response: 0.35, dampingFraction: 0.65), value: isPressed)
+            .animation(Tokens.Spring.liquid, value: isPressed)
     }
 }
 

@@ -20,7 +20,7 @@ struct QuickAddView: View {
                 .padding(.top, 12)
 
             Text("Add to Inbox")
-                .font(.headline)
+                .font(AppTypography.heading)
 
             TextField("New task", text: $title)
                 .textFieldStyle(.roundedBorder)
@@ -31,7 +31,7 @@ struct QuickAddView: View {
 
             Button(action: addTask) {
                 Text("Add")
-                    .font(.headline)
+                    .font(AppTypography.heading)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(

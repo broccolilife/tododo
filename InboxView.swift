@@ -41,7 +41,7 @@ struct InboxView: View {
                 .onPreferenceChange(TaskRowFramePreferenceKey.self) { value in
                     rowFrames = value
                     if let id = activePushPopTaskID, let frame = value[id] {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        withAnimation(Tokens.Spring.standard) {
                             pickerAnchor = frame
                         }
                     }
@@ -49,7 +49,7 @@ struct InboxView: View {
                 .onPreferenceChange(CategoryButtonFramePreferenceKey.self) { value in
                     categoryButtonFrames = value
                     if let id = activePushPopTaskID, let frame = value[id] {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        withAnimation(Tokens.Spring.standard) {
                             pickerAnchor = frame
                         }
                     }
@@ -215,7 +215,7 @@ struct InboxView: View {
     private func presentPicker(for taskID: UUID) {
         let targetFrame = categoryButtonFrames[taskID] ?? rowFrames[taskID]
         if let frame = targetFrame {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            withAnimation(Tokens.Spring.standard) {
                 pickerAnchor = frame
                 activePushPopTaskID = taskID
             }
@@ -244,12 +244,12 @@ struct InboxView: View {
             HStack(alignment: .center, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(task.title)
-                        .font(.headline)
+                        .font(AppTypography.heading)
                         .foregroundStyle(.primary)
                         .lineLimit(2)
                     if let notes = task.notes, !notes.isEmpty {
                         Text(notes)
-                            .font(.subheadline)
+                            .font(AppTypography.bodySecondary)
                             .foregroundStyle(.secondary)
                             .lineLimit(3)
                     }
@@ -259,7 +259,7 @@ struct InboxView: View {
                         } icon: {
                             Image(systemName: "calendar")
                         }
-                        .font(.footnote)
+                        .font(AppTypography.caption)
                         .foregroundStyle(.secondary)
                     }
                 }
@@ -396,7 +396,7 @@ struct InboxView: View {
                                             .foregroundStyle(Palette.color(for: "Calm"))
                                     }
                                     Text("New")
-                                        .font(.footnote)
+                                        .font(AppTypography.caption)
                                         .foregroundStyle(.secondary)
                                 }
                                 .padding(.horizontal, 12)
@@ -408,7 +408,7 @@ struct InboxView: View {
                     .onChange(of: categories.map(\.id)) { _ in
                         guard let target = pendingCategoryID else { return }
                         DispatchQueue.main.async {
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                            withAnimation(Tokens.Spring.gentle) {
                                 proxy.scrollTo(target, anchor: .center)
                             }
                             pendingCategoryID = nil
@@ -422,14 +422,21 @@ struct InboxView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Tokens.Spacing.lg) {
             Image(systemName: "sparkles")
-                .font(.system(size: 42))
+                .font(AppTypography.displayLarge)
                 .foregroundStyle(.secondary)
+                .phaseAnimator([false, true]) { content, phase in
+                    content
+                        .scaleEffect(phase ? 1.08 : 1.0)
+                        .opacity(phase ? 1.0 : 0.7)
+                } animation: { phase in
+                    .easeInOut(duration: 2.0)
+                }
             Text("Inbox is clear")
-                .font(.headline)
+                .font(AppTypography.displayMedium)
             Text("Pull down or tap the plus to add a gentle reminder.")
-                .font(.subheadline)
+                .font(AppTypography.bodySecondary)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
         }
@@ -438,7 +445,7 @@ struct InboxView: View {
     }
 
     private func toggle(_ task: Task) {
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+        withAnimation(Tokens.Spring.standard) {
             task.isDone.toggle()
             task.completedAt = task.isDone ? .now : nil
         }
@@ -451,7 +458,7 @@ struct InboxView: View {
     }
 
     private func assign(ids: [UUID], to category: Category) {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+        withAnimation(Tokens.Spring.gentle) {
             ids.forEach { id in
                 if let task = tasks.first(where: { $0.id == id }) {
                     task.category = category
@@ -474,7 +481,7 @@ struct InboxView: View {
             dismissPicker()
             return
         }
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
+        withAnimation(Tokens.Spring.gentle) {
             task.category = category
         }
         do {
@@ -486,7 +493,7 @@ struct InboxView: View {
     }
 
     private func dismissPicker() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+        withAnimation(Tokens.Spring.dismiss) {
             activePushPopTaskID = nil
             pickerAnchor = nil
         }
